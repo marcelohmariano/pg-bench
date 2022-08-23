@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  build-env:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build-env
+    volumes:
+      - .:/usr/src/app
+      - go_cache:/home/dev/go/cache
+      - go_mod_cache:/home/dev/go/pkg/mod
+    depends_on:
+      - timescaledb
+
+  timescaledb:
+    image: timescale/timescaledb-ha:pg14-latest
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - .:/usr/src/app
+      - timescaledb_data:/var/lib/postgresql/data
+    working_dir: /usr/src/app
+
+volumes:
+  go_cache:
+  go_mod_cache:
+  timescaledb_data:
