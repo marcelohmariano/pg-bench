@@ -5,10 +5,21 @@ set -e
 
 docker ps >/dev/null || exit 1
 
-for image in $(docker compose config --images); do
-  [[ -n "$(docker images -q "$image")" ]] && continue
-  docker compose build --build-arg UID="$(id -u)" --build-arg GID="$(id -g)"
-  docker compose pull
-done
+build_env_image='timescaledb-benchmark-build-env'
+build_env_service='build-env'
+
+timescaledb_image='timescale/timescaledb-ha:pg14-latest'
+timescaledb_service='timescaledb'
+
+if [[ -z "$(docker images -q "$build_env_image")" ]]; then
+  docker compose build \
+    --build-arg UID="$(id -u)" \
+    --build-arg GID="$(id -g)" \
+    "$build_env_service"
+fi
+
+if [[ -z "$(docker images -q "$timescaledb_image")" ]]; then
+  docker compose pull "$timescaledb_service"
+fi
 
 docker compose up -d --remove-orphans --wait 2>/dev/null

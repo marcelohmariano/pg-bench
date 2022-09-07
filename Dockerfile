@@ -23,6 +23,8 @@ CMD ["--help"]
 
 FROM golang:1.19 as build-env
 
+ARG WORKDIR
+
 ARG GOLANGCI_LINT_VERSION='v1.48.0'
 ARG GOLANGCI_LINT_INSTALLER='https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh'
 
