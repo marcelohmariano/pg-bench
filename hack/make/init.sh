@@ -7,11 +7,10 @@ docker ps >/dev/null || exit 1
 
 for image in $(docker compose config --images); do
   [[ -n "$(docker images -q "$image")" ]] && continue
-
-  docker compose pull 2>/dev/null || true
-  [[ -n "$(docker images -q "$image")" ]] && continue
-
   docker compose build --build-arg UID="$(id -u)" --build-arg GID="$(id -g)"
+
+  [[ -n "$(docker images -q "$image")" ]] && continue
+  docker compose pull
 done
 
 docker compose up -d --remove-orphans --wait 2>/dev/null
