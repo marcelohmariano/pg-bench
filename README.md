@@ -44,7 +44,7 @@ the host to avoid permission problems.
 Once the development environment is ready, you can build the benchmark image:
 
 ```shell
-docker build -t benchmark .
+docker build -t benchmark --target release .
 ```
 
 Optionally, you can build a binary:
