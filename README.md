@@ -36,26 +36,26 @@ cd timescaledb-benchmark
 make init
 ```
 
-You can also initialize the development environment by running `docker compose up -d`.
+Note that `make init` will build the `build-env` image with `UID` and `GID` from
+the host to avoid permission problems.
 
 #### Build
 
-Once the development environment is ready, you can build the project binary:
-
-```shell
-$ make all
-```
-
-The command above will produce a binary according to your local OS and CPU
-architecture and will place it at `./bin/benchmark`. You can manually select an
-OS and CPU architecture by setting the `GOOS` and `GOARCH` environment variables
-respectively.
-
-Optionally, you can build a Docker image for the benchmark binary:
+Once the development environment is ready, you can build the benchmark image:
 
 ```shell
 docker build -t benchmark .
 ```
+
+Optionally, you can build a binary:
+
+```shell
+make all
+```
+
+The command above will produce a binary according to the host OS and CPU architecture
+and will place it at `./bin/benchmark`. You can manually select an OS and CPU
+architecture by setting the `GOOS` and `GOARCH` environment variables respectively.
 
 #### Setup a TimescaleDB instance
 
@@ -72,23 +72,23 @@ file.
 
 #### Running
 
-Now you can run the benchmark binary:
-
-```shell
-./bin/benchmark \
-  --db-url "postgres://postgres:pass@localhost:5432/homework" \
-  --query ./data/query_template.sql \
-  --query-args ./data/query_params.csv
-```
-
-Or, if you've chosen to build a Docker image in the previous steps, you can run
-it like this:
+Now you can run the benchmark image:
 
 ```shell
 docker run -it --rm --network host -v "$PWD/data:/data" benchmark \
   --db-url "postgres://postgres:pass@localhost:5432/homework" \
   --query ./query_template.sql \
   --query-args ./query_params.csv
+```
+
+Or, if you've chosen to build a binary in the previous steps, you can run
+it like this:
+
+```shell
+./bin/benchmark \
+  --db-url "postgres://postgres:pass@localhost:5432/homework" \
+  --query ./data/query_template.sql \
+  --query-args ./data/query_params.csv
 ```
 
 In both cases, the ouput should be similar to this:
