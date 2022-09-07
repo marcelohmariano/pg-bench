@@ -10,7 +10,7 @@ COPY . .
 RUN apk add --no-cache bash make && make DOCKER_ENABLED=0 all
 
 
-FROM alpine:3.16 as release
+FROM alpine as release
 
 ARG WORKDIR
 
