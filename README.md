@@ -39,6 +39,19 @@ make init
 Note that `make init` will build the `build-env` image with `UID` and `GID` from
 the host to avoid permission problems.
 
+#### Setup a TimescaleDB instance
+
+Before running the benchmarks, setup a TimescaleDB instance set up with the
+sample data provided [here](./data):
+
+```shell
+make seed
+```
+
+The command above will create a database named `homework` in a local TimescaleDB
+instance configured according to the definitions in [docker-compose.yml](docker-compose.yml)
+file.
+
 #### Build
 
 Once the development environment is ready, you can build the benchmark image:
@@ -57,20 +70,7 @@ The command above will produce a binary according to the host OS and CPU archite
 and will place it at `./bin/benchmark`. You can manually select an OS and CPU
 architecture by setting the `GOOS` and `GOARCH` environment variables respectively.
 
-#### Setup a TimescaleDB instance
-
-Before running the benchmarks, setup a TimescaleDB instance set up with the
-sample data provided [here](./data):
-
-```shell
-make seed
-```
-
-The command above will create a database named `homework` in a local TimescaleDB
-instance configured according to the definitions in [docker-compose.yml](docker-compose.yml)
-file.
-
-#### Running
+#### Run
 
 Now you can run the benchmark image:
 
