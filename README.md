@@ -41,8 +41,8 @@ the host to avoid permission problems.
 
 #### Setup a TimescaleDB instance
 
-Before running the benchmarks, setup a TimescaleDB instance set up with the
-sample data provided [here](./data):
+Before running the benchmarks, you will need a TimescaleDB instance set up with
+the sample data provided [here](./data):
 
 ```shell
 make seed
