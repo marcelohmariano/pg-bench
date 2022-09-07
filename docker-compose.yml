@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: build-env
+    image: timescaledb-benchmark-build-env
     volumes:
       - .:/usr/src/app
       - go_cache:/home/dev/go/cache
