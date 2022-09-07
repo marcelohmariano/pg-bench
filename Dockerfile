@@ -1,3 +1,26 @@
+ARG WORKDIR="/usr/src/app"
+
+FROM golang:1.19-alpine as builder
+
+ARG WORKDIR
+
+WORKDIR "$WORKDIR"
+COPY . .
+
+RUN apk add --no-cache bash make && make DOCKER_ENABLED=0 all
+
+
+FROM alpine:3.16 as release
+
+ARG WORKDIR
+
+COPY --from=builder "${WORKDIR}/bin/benchmark" /usr/local/bin/benchmark
+WORKDIR /data
+
+ENTRYPOINT ["benchmark"]
+CMD ["--help"]
+
+
 FROM golang:1.19 as build-env
 
 ARG GOLANGCI_LINT_VERSION='v1.48.0'
@@ -21,18 +44,7 @@ RUN chown -R $UID:$GID /home/dev/
 VOLUME "$GOCACHE"
 VOLUME "$GOMODCACHE"
 
-WORKDIR /usr/src/app
-COPY . .
-
-RUN make DOCKER_ENABLED=0 all && chown -R $UID:$GID .
-
+WORKDIR "$WORKDIR"
 USER dev
+
 CMD exec /bin/sh -c 'trap : TERM INT; sleep infinity & wait'
-
-
-FROM debian:stable-slim
-
-COPY --from=build-env /usr/src/app/bin/benchmark /usr/local/bin/
-WORKDIR /data
-
-ENTRYPOINT ["benchmark"]
