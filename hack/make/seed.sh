@@ -2,7 +2,7 @@
 set -e
 
 echo 'Waiting for the database to become responsive...'
-./hack/wait-for-it.sh localhost:5432 -q -t 30
+./hack/wait-for-it.sh localhost:5432 -q -t 300
 
 echo 'Seeding the database with sample data...'
 psql -U postgres -c 'DROP DATABASE IF EXISTS homework'
