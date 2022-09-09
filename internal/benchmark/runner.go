@@ -1,6 +1,9 @@
 package benchmark
 
-import "context"
+import (
+	"context"
+	"sync"
+)
 
 type RunnerOption func(r *Runner)
 
@@ -30,17 +33,33 @@ func WithWorkers(count uint) RunnerOption {
 	}
 }
 
-func (r Runner) Run(ctx context.Context, sql string) (*Summary, error) {
+func (r *Runner) Run(ctx context.Context, sql string) Summary {
+	var (
+		wg sync.WaitGroup
+		mu sync.Mutex
+
+		summary Summary
+	)
+
+	summary.RecordStartTime()
+
 	for r.args.Scan() {
 		args := r.args.Data()
 		key := args[0]
 
-		task := NewTask(key, sql, args)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			res := r.group.Benchmark(ctx, key, sql, args)
 
-		if err := r.group.AddTask(ctx, task); err != nil {
-			return nil, err
-		}
+			mu.Lock()
+			defer mu.Unlock()
+			summary.Add(res)
+		}()
 	}
 
-	return r.group.Wait(), nil
+	wg.Wait()
+	summary.RecordStopTime()
+
+	return summary
 }

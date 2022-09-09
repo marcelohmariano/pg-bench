@@ -33,5 +33,5 @@ func (w *Worker) Benchmark(ctx context.Context, sql string, args QueryArgs) Resu
 	}
 	defer rows.Close()
 
-	return Result{ExecTime: elapsed}
+	return Result{Duration: elapsed}
 }

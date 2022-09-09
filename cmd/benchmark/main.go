@@ -46,13 +46,9 @@ func run() error {
 	defer func() { _ = args.Close() }()
 
 	runner := benchmark.NewRunner(pool, args, benchmark.WithWorkers(workersFlagValue))
-	summary, err := runner.Run(ctx, query)
-
-	if err != nil {
-		return err
-	}
-
+	summary := runner.Run(ctx, query)
 	printSummary(summary)
+
 	return nil
 }
 
@@ -78,7 +74,7 @@ func parseQueryArgs(args []string) (benchmark.QueryArgs, error) {
 	return benchmark.QueryArgs{hostname, startTime, endTime}, nil
 }
 
-func printSummary(summary *benchmark.Summary) {
+func printSummary(summary benchmark.Summary) {
 	fmt.Printf("Queries processed: %v\n", summary.NumberOfQueries())
 	fmt.Printf("Queries with success: %v\n", summary.NumberOfSuccesses())
 	fmt.Printf("Queries with error: %v\n\n", summary.NumberOfErrors())

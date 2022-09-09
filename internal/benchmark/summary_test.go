@@ -63,18 +63,18 @@ func TestSummary(t *testing.T) {
 			}
 
 			var stats Summary
-			stats.Start()
+			stats.RecordStartTime()
 
 			for scanner.Scan() {
 				nsec, err := strconv.ParseInt(scanner.Text(), 10, 64)
 				if err != nil {
 					t.Fatal(err)
 				}
-				result := Result{ExecTime: time.Duration(nsec)}
+				result := Result{Duration: time.Duration(nsec)}
 				stats.Add(result)
 			}
 
-			stats.Done()
+			stats.RecordStopTime()
 
 			assert.Equal(t, tt.expectedNumberOfQueries, stats.NumberOfQueries())
 			assert.Equal(t, tt.expectedNumberOfSuccesses, stats.NumberOfSuccesses())
@@ -85,7 +85,7 @@ func TestSummary(t *testing.T) {
 			assert.Equal(t, tt.expectedAvgQueryTime, stats.AvgQueryTime())
 			assert.Equal(t, expectedOverallQueryTime, stats.OverallQueryTime())
 
-			stats.Start()
+			stats.RecordStartTime()
 
 			assert.Equal(t, int64(0), stats.NumberOfQueries())
 			assert.Equal(t, int64(0), stats.NumberOfSuccesses())

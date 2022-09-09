@@ -5,79 +5,32 @@ import (
 	"context"
 	"encoding/gob"
 	"hash/maphash"
-	"sync"
 )
 
-type Task struct {
-	Key  any
-	SQL  string
-	Args QueryArgs
-}
-
-func NewTask(key any, sql string, args QueryArgs) *Task {
-	return &Task{
-		Key:  key,
-		SQL:  sql,
-		Args: args,
-	}
-}
+var hashSeed = maphash.MakeSeed()
 
 type Group struct {
-	mu     sync.Mutex
-	wg     sync.WaitGroup
-	once   *sync.Once
-	hasher maphash.Hash
-
 	pool    PGPool
 	workers []*Worker
-
-	summary *Summary
 }
 
 func NewGroup(pool PGPool, workers uint) *Group {
-	return &Group{
-		pool:    pool,
-		once:    new(sync.Once),
-		summary: new(Summary),
-		workers: make([]*Worker, workers),
+	g := &Group{pool: pool}
+	g.workers = make([]*Worker, workers)
+
+	for i := 0; i < int(workers); i++ {
+		g.workers[i] = NewWorker(pool, WorkerID(i+1))
 	}
+
+	return g
 }
 
-func (g *Group) AddTask(ctx context.Context, task *Task) error {
-	worker, err := g.WorkerOf(task.Key)
+func (g *Group) Benchmark(ctx context.Context, key any, sql string, args QueryArgs) Result {
+	worker, err := g.WorkerOf(key)
 	if err != nil {
-		return err
+		return Result{Err: err}
 	}
-	return g.runTask(ctx, task, worker)
-}
-
-func (g *Group) runTask(ctx context.Context, task *Task, worker *Worker) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-	}
-
-	g.once.Do(func() { g.summary.Start() })
-
-	g.wg.Add(1)
-	go func() {
-		defer g.wg.Done()
-		res := worker.Benchmark(ctx, task.SQL, task.Args)
-
-		g.mu.Lock()
-		defer g.mu.Unlock()
-		g.summary.Add(res)
-	}()
-
-	return nil
-}
-
-func (g *Group) Wait() *Summary {
-	g.wg.Wait()
-	g.summary.Done()
-	g.once = new(sync.Once)
-	return g.summary
+	return worker.Benchmark(ctx, sql, args)
 }
 
 func (g *Group) WorkerOf(key any) (*Worker, error) {
@@ -87,16 +40,12 @@ func (g *Group) WorkerOf(key any) (*Worker, error) {
 	}
 
 	idx := hash % uint64(len(g.workers))
-
-	if g.workers[idx] == nil {
-		g.workers[idx] = NewWorker(g.pool, WorkerID(idx+1))
-	}
-
 	return g.workers[idx], nil
 }
 
 func (g *Group) hash(key any) (uint64, error) {
-	g.hasher.Reset()
+	var h maphash.Hash
+	h.SetSeed(hashSeed)
 
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
@@ -105,10 +54,10 @@ func (g *Group) hash(key any) (uint64, error) {
 		return 0, err
 	}
 
-	_, err := g.hasher.Write(buf.Bytes())
+	_, err := h.Write(buf.Bytes())
 	if err != nil {
 		return 0, err
 	}
 
-	return g.hasher.Sum64(), nil
+	return h.Sum64(), nil
 }

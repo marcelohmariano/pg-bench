@@ -10,7 +10,7 @@ var timeSinceFunc = func(t time.Time) time.Duration {
 }
 
 type Result struct {
-	ExecTime time.Duration
+	Duration time.Duration
 	Err      error
 }
 
@@ -80,11 +80,11 @@ type Summary struct {
 	stats *stats
 }
 
-func (s *Summary) Start() {
+func (s *Summary) RecordStartTime() {
 	s.stats = newStats()
 }
 
-func (s *Summary) Done() {
+func (s *Summary) RecordStopTime() {
 	s.stats.UpdateOverallTime()
 }
 
@@ -97,12 +97,10 @@ func (s *Summary) Add(result Result) {
 	}
 
 	s.stats.IncSuccesses()
-	execTime := result.ExecTime
-
-	s.stats.UpdateMinTime(execTime)
-	s.stats.UpdateMaxTime(execTime)
-	s.stats.UpdateAvgTime(execTime)
-	s.stats.UpdateMedianTime(execTime)
+	s.stats.UpdateMinTime(result.Duration)
+	s.stats.UpdateMaxTime(result.Duration)
+	s.stats.UpdateAvgTime(result.Duration)
+	s.stats.UpdateMedianTime(result.Duration)
 }
 
 func (s *Summary) NumberOfQueries() int64 {
