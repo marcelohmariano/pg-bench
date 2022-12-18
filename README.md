@@ -42,7 +42,7 @@ The command above will generate the binary at `./bin/pg-bench`.
 You can run the benchmark binary like so:
 
 ```shell
-./bin/bench -u "<user>:<pass>@<host>:<port>/<dbname>" -f <sql_file>
+./bin/pg-bench -u "<user>:<pass>@<host>:<port>/<dbname>" -f <sql_file>
 ```
 
 After running it, you should see an output similar to this:
@@ -54,11 +54,11 @@ Statements:
   Failed: 0
 
 Durations:
-  Min: 79.543205ms
-  Max: 344.725547ms
-  Average: 181.459413ms
-  Median: 168.113747ms
-  Overall: 3.133904956s
+  Min: 66.114373ms
+  Max: 242.215678ms
+  Average: 158.03909ms
+  Median: 145.065445ms
+  Overall: 2.730135061s
 ```
 
 ## Testing
