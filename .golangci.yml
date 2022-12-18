@@ -1,0 +1,14 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+  skip-files:
+    - ".*_test\\.go$"
+
+linters-settings:
+  govet:
+    enable-all: true
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
