@@ -42,28 +42,26 @@ clean:
 	rm -f $(BIN)/$(BINARY)
 
 # @fmt: Format Go source files that don't follow a standard formatting style.
-# @fmt: Pass `WHAT=path/to/file/or/package` to format only a file or package.
+# @fmt: Pass `WHAT=path/to/file/or/package` to format a specific file or package.
 .PHONY: fmt
 fmt: $(GOFMT)
 	./hack/fmt.sh -w '$(WHAT)'
 
 # @lint: Lint Go source files.
-# @lint: Pass `WHAT=path/to/file/or/package` to lint only a file or package.
+# @lint: Pass `WHAT=path/to/file/or/package` to lint a specific file or package.
 .PHONY: lint
 lint: $(GOLANGCI_LINT)
 	./hack/lint.sh -w '$(WHAT)'
 
 # @test: Run tests.
-# @test: Pass `WHAT=path/to/package` to test only a package.
+# @test: Pass `WHAT=path/to/package` to test a specific  package.
 # @test: Pass `COV=y` to enable coverage analysis.
 .PHONY: test
-test: gen
+test:
 	./hack/test.sh -w '$(WHAT)' -c '$(COV)'
 
-.PHONY: gen
-gen: $(MOCKGEN)
-	go generate ./...
-
+# @tidy: Update dependencies.
+# @tidy: Pass `WHAT=path/to/module` to update dependencies for a specific module.
 .PHONY: tidy
 tidy:
 	./hack/tidy.sh -w '$(WHAT)'
